@@ -1,6 +1,7 @@
 # get player shooting charts for a specific game
 
 season <- 2022
+season2 <- 2023
 
 load(paste0(path, "/Data/games_player_team_", season, ".Rdata"))
 
