@@ -1,5 +1,7 @@
 # get player shooting charts for a specific game
 # updated the comment
+library(tidyverse)
+
 season <- 2022
 
 load(paste0(path, "/Data/games_player_team_", season, ".Rdata"))
