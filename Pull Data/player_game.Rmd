@@ -6,6 +6,20 @@ output: html_document
 ---
 
 ```{r}
-# test
+source("setup.R")
+```
+
+```{r}
+
+box_scores(
+  game_ids = c(21700002)
+)
+
+
+bref_players_stats(
+  seasons = c(2017)
+)
+
+
 ```
 
