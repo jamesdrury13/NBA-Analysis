@@ -18,6 +18,32 @@ box_scores(
 
 d <- dataBoxScorePlayerNBA
 
+
+bref_players_stats(seasons = 2019)
+
+teams_tables(all_active_teams = TRUE,
+             seasons = 2022:2023,
+             # teams = "Phoenix Suns",
+             tables = c("player"),
+             modes = c("PerGame", "Per100Possessions"),
+             measures = c("Base", "Advanced"))
+
+
+# write_rds(dataPlayerTeamBase, "dataPlayerTeamBase_2022_2023.rds")
+# write_rds(dataPlayerTeamAdvanced, "dataPlayerTeamAdvanced_2022_2023.rds")
+
+db <- read_rds("dataPlayerTeamBase_2022_2023.rds")
+d_base_team <- db %>%
+  filter(nameTable == "TeamOverall")
+d_base_player <- db %>%
+  filter(nameTable == "PlayersSeasonTotals")
+da <- read_rds("dataPlayerTeamAdvanced_2022_2023.rds")
+d_adv_team <- da %>%
+  filter(nameTable == "TeamOverall" & modeSearch == "PerGame") %>%
+  mutate(netrtg = ortg - drtg,
+         netrtgE = ortgE - drtgE)
+d_adv_player <- da %>%
+  filter(nameTable == "PlayersSeasonTotals")
 ```
 
 ### DEV: both team shooting barplot
@@ -101,28 +127,41 @@ both_team_shooting_barplot <- function() {
 ```
 
 
-### DEV: Summary stats for game (pace, efficiency, etc.)
+### DEV: Select a team and put that team in context to the overall league
 ```{r}
 
-d %>%
-  mutate(namePlayer = reorder(namePlayer, -minExact)) %>%
-  ggplot(aes(x = namePlayer, y = pts, fill = slugTeam)) +
-  geom_bar(stat = "identity") +
-  facet_wrap( ~ slugTeam)
 
 
 
-x <- d %>%
-  group_by(slugTeam) %>%
-  summarize(across(c(everything()),
+
+teamTable_fnc <- function(team) {
+  d_adv_team %>%
+    filter(yearSeason == 2022) %>%
+    mutate(ortgRank = rank(-ortg),
+           drtgRank = rank(-drtg),
+           netrtgRank = rank(-netrtg),
+           pctTS = percent(pctTS)) %>%
+    filter(nameTeam == team) %>%
+    select("Team" = nameTeam, 
+           "Wins" = wins, 
+           "True Shooting %" = pctTS, 
+           "Offensive Rating" = ortg,
+           "Defensive Rating" = drtg,
+           "Net Rating" = netrtg,
+           "Offensive Rating (rank)" = ortgRank,
+           "Defensive Rating (rank)" = drtgRank,
+           "Net Rating (rank)" = netrtgRank)
+}
+
+
+
+
+
+x <- d_adv_team %>%
+  group_by(yearSeason) %>%
+  filter(modeSearch == "PerGame") %>%
+  summarize(across(c(ortg, pctTS, pctOREB, pctDREB, pace),
                    ~ mean(.)))
-
-d <- dataBoxScoreTeamNBA
-
-d %>%
-  select(pace)
-
-
 
 
 ```
